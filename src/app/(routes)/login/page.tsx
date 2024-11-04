@@ -37,8 +37,8 @@ const LoginPage: React.FC = () => {
       email: values.email,
       password: values.password,
     });
-
-    if (result?.error) {
+    console.log("SignIn result:", result);
+    if (result?.error &&result?.error!=null) {
       setErrors({ email: result.error });
       toast.error(result.error);
     }else {
@@ -73,7 +73,7 @@ const LoginPage: React.FC = () => {
               ))}
               <button
                 type="submit"
-                disabled={isSubmitting}
+               
                 className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
               >
                 Login
@@ -87,4 +87,3 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
-

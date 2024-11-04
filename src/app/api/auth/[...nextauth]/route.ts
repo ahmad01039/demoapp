@@ -1,4 +1,6 @@
 
+// export const GET = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
+// export const POST = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextApiRequest, NextApiResponse } from "next";
