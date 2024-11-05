@@ -3,13 +3,9 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react"; 
 import { toast } from 'react-hot-toast';
 import Link from "next/link"; 
-
+import { navbarRoutes as routes } from "@/constants/navbarRoutes";
 const Navbar: React.FC = () => {
   const pathname = usePathname(); 
-  const routes = [
-    { name: "Dashboard", url: "/dashboard" },
-    { name: "Products", url: "/products" },
-  ];
   const shouldDisplayNavbar = routes.some(route => pathname === route.url);
   if (!shouldDisplayNavbar) return null;
 

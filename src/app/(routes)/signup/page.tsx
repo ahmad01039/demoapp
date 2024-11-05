@@ -36,6 +36,7 @@ const SignupPage: React.FC = () => {
         <Formik
           initialValues={signupInitialValues}
           validationSchema={validationSchema}
+          validateOnBlur={true}  
           onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
