@@ -68,8 +68,8 @@ export const signupFields: FormField[] = [
     name: 'password',
     validation: Yup.string()
       .required('Password is required')
-      .min(6, 'Password must be at least 6 characters long')
-      .matches(/^(?=(.*[a-z]){2})(?=(.*[A-Z]){2})(?=(.*\d){2})(?=(.*[!@#$%^&*(),.?":{}|<>]){2})[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/, 
-               'Password must contain at least 2 uppercase letters, 2 lowercase letters, 2 digits, and 2 special characters'),
+      .min(6, 'Password must be at least 6 characters long'),
+      // .matches(/^(?=(.*[a-z]){2})(?=(.*[A-Z]){2})(?=(.*\d){2})(?=(.*[!@#$%^&*(),.?":{}|<>]){2})[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/, 
+      //          'Password must contain at least 2 uppercase letters, 2 lowercase letters, 2 digits, and 2 special characters'),
   },
 ];
