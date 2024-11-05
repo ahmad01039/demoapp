@@ -7,11 +7,14 @@ import { signupFields } from '../../../lib/inputConfig';
 import { signup } from '../../../lib/apiWrapper'; 
 import { toast, Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
 interface FormValues {
   name: string;
   email: string;
   password: string;
 }
+
 const SignupPage: React.FC = () => {
   const router = useRouter();
   const initialValues: FormValues = {
@@ -30,6 +33,7 @@ const SignupPage: React.FC = () => {
       return acc;
     }, {} as ValidationSchema)
   );
+
   const handleSubmit = async (
     values: FormValues,
     { setSubmitting, setErrors, resetForm }: FormikHelpers<FormValues>
@@ -41,11 +45,12 @@ const SignupPage: React.FC = () => {
       router.push('/login'); 
     } catch (error) {
       toast.error("An error occurred while signing up!");
-      setErrors({ email: "An error occured" }); 
+      setErrors({ email: "An error occurred" }); 
     } finally {
       setSubmitting(false);
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
@@ -79,6 +84,14 @@ const SignupPage: React.FC = () => {
             </Form>
           )}
         </Formik>
+        <div className="text-center mt-4">
+          <p className="text-gray-600">
+            Already have an account?{' '}
+            <Link href="/login" className="text-blue-500 hover:underline">
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

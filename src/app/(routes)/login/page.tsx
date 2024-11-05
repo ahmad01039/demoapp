@@ -1,4 +1,3 @@
-
 "use client";
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
@@ -8,29 +7,34 @@ import Input from '../../../components/inputs/Input';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginFields } from '../../../lib/inputConfig'; 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
 interface FormValues {
   email: string;
   password: string;
 }
+
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const initialValues: FormValues = {
     email: '',
     password: '',
   };
+
   type ValidationSchema = {
-    [key: string]: Yup.StringSchema | Yup.Schema<any>; 
+    [key: string]: Yup.StringSchema | Yup.Schema<any>;
   };
+
   const validationSchema = Yup.object().shape(
     loginFields.reduce<ValidationSchema>((acc, field) => {
-      acc[field.name] = field.validation; 
+      acc[field.name] = field.validation;
       return acc;
-    }, {} as ValidationSchema) 
+    }, {} as ValidationSchema)
   );
 
   const handleSubmit = async (
     values: FormValues,
-    { setSubmitting, setErrors,resetForm }: FormikHelpers<FormValues>
+    { setSubmitting, setErrors, resetForm }: FormikHelpers<FormValues>
   ) => {
     const result = await signIn('credentials', {
       redirect: false,
@@ -38,13 +42,13 @@ const LoginPage: React.FC = () => {
       password: values.password,
     });
     console.log("SignIn result:", result);
-    if (result?.error &&result?.error!=null) {
+    if (result?.error && result?.error != null) {
       setErrors({ email: result.error });
       toast.error(result.error);
-    }else {
-      toast.success("Logged in successfully!"); 
-      resetForm(); 
-      router.push('/dashboard'); 
+    } else {
+      toast.success("Logged in successfully!");
+      resetForm();
+      router.push('/dashboard');
     }
     setSubmitting(false);
   };
@@ -73,7 +77,6 @@ const LoginPage: React.FC = () => {
               ))}
               <button
                 type="submit"
-               
                 className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
               >
                 Login
@@ -81,7 +84,16 @@ const LoginPage: React.FC = () => {
             </Form>
           )}
         </Formik>
+        <div className="text-center mt-4">
+          <p className="text-gray-600">
+            Don't have an account?{' '}
+            <Link href="/signup" className="text-blue-500 hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
+      <Toaster />
     </div>
   );
 };
