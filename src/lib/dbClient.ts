@@ -1,11 +1,11 @@
 import { Client } from "pg";
 
 const client = new Client({
-  host: "localhost",
-  port: 5432,
-  user: "root",
-  password: "root",
-  database: "datics",
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT) || 5432,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 client.connect().catch(err => console.error("Connection error", err.stack));

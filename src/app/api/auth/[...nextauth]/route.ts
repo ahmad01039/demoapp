@@ -1,6 +1,4 @@
 
-// export const GET = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
-// export const POST = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -61,9 +59,13 @@ const authOptions: NextAuthOptions = {
     },
   },
 };
-const handler = async (req:NextApiRequest, res:NextApiResponse) => {
-  return await NextAuth(req, res, authOptions);
-};
-export default handler;
+// const handler = async (req:NextApiRequest, res:NextApiResponse) => {
+//   return await NextAuth(req, res, authOptions);
+// };
+// export default handler;
 
-export { handler as GET, handler as POST };
+// export { handler as GET, handler as POST };
+
+export const GET = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
+export const POST = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
+

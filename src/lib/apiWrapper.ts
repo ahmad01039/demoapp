@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:3000/api/'; 
+// const API_BASE_URL = 'http://localhost:3000/api/'; 
+
+const API_BASE_URL=process.env.NEXT_PUBLIC_BASE_URL;
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -25,7 +27,6 @@ const apiRequest = async (endpoint: string, options: ApiRequestOptions) => {
 
     return await response.json();
   } catch (error: any) {
-    // console.error(`Error with request to ${endpoint}:`, error.message);
     throw new Error(error?.message || 'Network error');
   }
 };
