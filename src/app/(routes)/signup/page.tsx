@@ -1,20 +1,13 @@
 "use client";
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
 import Input from '../../../components/inputs/Input';
-import { signupFields } from '../../../lib/inputConfig'; 
+import { signupFields,createValidationSchema } from '../../../lib/inputConfig'; 
 import { signup } from '../../../lib/apiWrapper'; 
 import { toast, Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-interface FormValues {
-  name: string;
-  email: string;
-  password: string;
-}
-
+import { FormValues } from '@/types/formTypes';
 const SignupPage: React.FC = () => {
   const router = useRouter();
   const initialValues: FormValues = {
@@ -22,18 +15,7 @@ const SignupPage: React.FC = () => {
     email: '',
     password: '',
   };
-
-  type ValidationSchema = {
-    [key: string]: Yup.StringSchema | Yup.Schema<any>; 
-  };
-
-  const validationSchema = Yup.object().shape(
-    signupFields.reduce<ValidationSchema>((acc, field) => {
-      acc[field.name] = field.validation; 
-      return acc;
-    }, {} as ValidationSchema)
-  );
-
+  const validationSchema = createValidationSchema(signupFields);
   const handleSubmit = async (
     values: FormValues,
     { setSubmitting, setErrors, resetForm }: FormikHelpers<FormValues>

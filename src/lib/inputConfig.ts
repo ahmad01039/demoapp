@@ -1,5 +1,19 @@
 import * as Yup from 'yup';
 
+
+export type ValidationSchema = {
+  [key: string]: Yup.StringSchema | Yup.Schema<any>;
+};
+
+export const createValidationSchema = (fields: { name: string; validation: Yup.Schema<any> }[]) => {
+  return Yup.object().shape(
+    fields.reduce<ValidationSchema>((acc, field) => {
+      acc[field.name] = field.validation;
+      return acc;
+    }, {})
+  );
+};
+
 interface FormField {
   label: string;
   type: string;

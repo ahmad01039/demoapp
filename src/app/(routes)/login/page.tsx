@@ -1,37 +1,20 @@
 "use client";
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
 import { signIn } from 'next-auth/react';
 import Input from '../../../components/inputs/Input';
 import { toast, Toaster } from 'react-hot-toast';
-import { loginFields } from '../../../lib/inputConfig'; 
+import { loginFields,createValidationSchema } from '../../../lib/inputConfig'; 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-interface FormValues {
-  email: string;
-  password: string;
-}
-
+import { FormValues } from '@/types/formTypes';
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const initialValues: FormValues = {
     email: '',
     password: '',
   };
-
-  type ValidationSchema = {
-    [key: string]: Yup.StringSchema | Yup.Schema<any>;
-  };
-
-  const validationSchema = Yup.object().shape(
-    loginFields.reduce<ValidationSchema>((acc, field) => {
-      acc[field.name] = field.validation;
-      return acc;
-    }, {} as ValidationSchema)
-  );
-
+  const validationSchema = createValidationSchema(loginFields);
   const handleSubmit = async (
     values: FormValues,
     { setSubmitting, setErrors, resetForm }: FormikHelpers<FormValues>
