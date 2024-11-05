@@ -24,7 +24,6 @@ const LoginPage: React.FC = () => {
       email: values.email,
       password: values.password,
     });
-    console.log("SignIn result:", result);
     if (result?.error && result?.error != null) {
       setErrors({ email: result.error });
       toast.error(result.error);
