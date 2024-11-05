@@ -4,16 +4,12 @@ import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
 import { signIn } from 'next-auth/react';
 import Input from '../../../components/inputs/Input';
 import { toast, Toaster } from 'react-hot-toast';
-import { loginFields,createValidationSchema } from '../../../lib/inputConfig'; 
+import { loginFields,createValidationSchema,loginInitialValues } from '../../../lib/inputConfig'; 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FormValues } from '@/types/formTypes';
 const LoginPage: React.FC = () => {
   const router = useRouter();
-  const initialValues: FormValues = {
-    email: '',
-    password: '',
-  };
   const validationSchema = createValidationSchema(loginFields);
   const handleSubmit = async (
     values: FormValues,
@@ -40,7 +36,7 @@ const LoginPage: React.FC = () => {
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Login</h2>
         <Formik
-          initialValues={initialValues}
+          initialValues={loginInitialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
 import Input from '../../../components/inputs/Input';
-import { signupFields,createValidationSchema } from '../../../lib/inputConfig'; 
+import { signupFields,createValidationSchema,signupInitialValues } from '../../../lib/inputConfig'; 
 import { signup } from '../../../lib/apiWrapper'; 
 import { toast, Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -10,11 +10,6 @@ import Link from 'next/link';
 import { FormValues } from '@/types/formTypes';
 const SignupPage: React.FC = () => {
   const router = useRouter();
-  const initialValues: FormValues = {
-    name: '',
-    email: '',
-    password: '',
-  };
   const validationSchema = createValidationSchema(signupFields);
   const handleSubmit = async (
     values: FormValues,
@@ -39,7 +34,7 @@ const SignupPage: React.FC = () => {
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Sign Up</h2>
         <Toaster />
         <Formik
-          initialValues={initialValues}
+          initialValues={signupInitialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >

@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-
+import { FormValues } from '@/types/formTypes';
 
 export type ValidationSchema = {
   [key: string]: Yup.StringSchema | Yup.Schema<any>;
@@ -13,7 +13,16 @@ export const createValidationSchema = (fields: { name: string; validation: Yup.S
     }, {})
   );
 };
+export const signupInitialValues: FormValues = {
+  name: '',
+  email: '',
+  password: '',
+};
 
+export const loginInitialValues: FormValues = {
+  email: '',
+  password: '',
+};
 interface FormField {
   label: string;
   type: string;
