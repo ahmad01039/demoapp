@@ -6,8 +6,6 @@ const protectedRoutes = ['/dashboard'];
 export function middleware(req: NextRequest) {
   const token = req.cookies.get('__Secure-next-auth.session-token');
   const { pathname } = req.nextUrl;
-console.log("path name getting invoked");
-  console.log(pathname);
   if (pathname === '/') {
     if (token) {
       return NextResponse.redirect(new URL('/dashboard', req.url));
