@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         { status: 201 }
       );
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ error: error }), {
         status: 500,
       });
   }
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
       );
     } catch (error) {
       return new Response(
-        JSON.stringify({ error: "Internal server error" }),
+        JSON.stringify({ error: error }),
         { status: 500 }
       );
     }
@@ -68,7 +68,7 @@ export async function GET(req: Request) {
       );
     } catch (error) {
       return new Response(
-        JSON.stringify({ error: "Internal server error" }),
+        JSON.stringify({ error: error }),
         { status: 500 }
       );
     }

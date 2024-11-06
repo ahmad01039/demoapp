@@ -1,3 +1,4 @@
+import ClientQueryClientProvider from "../components/clientQueryProvider/QueryProvider";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Navbar from "@/components/navbar/Navbar";
@@ -31,8 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ClientQueryClientProvider>
       <Navbar/>
+      
         {children}
+        </ClientQueryClientProvider>
       </body>
     </html>
   );
