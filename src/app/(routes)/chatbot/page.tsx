@@ -1,12 +1,15 @@
 "use client";
 import React, { useEffect } from "react";
 import { useChat } from "ai/react";
-
+import { Weather } from "@/components/weather";
+import FlightDetails from "@/components/cities"; 
 export default function Dashboard() {
   const { messages, input, setInput, handleSubmit } = useChat();
+
   useEffect(() => {
     console.log(messages);
   }, [messages]);
+
   return (
     <div className="flex flex-col items-center min-h-screen">
       <h1 className="mt-4 mb-4 text-2xl text-center">Datics Ai</h1>
@@ -26,10 +29,48 @@ export default function Dashboard() {
                 {message.role === "user" ? "You" : "AI"}:
               </div>
               <div>{message.content}</div>
+              <div>
+                {message.toolInvocations?.map((toolInvocation) => {
+                  const { toolName, toolCallId, state } = toolInvocation;
+                  if (state === "result" && toolName === "displayWeather") {
+                    const { result } = toolInvocation;
+                    return (
+                      <div key={toolCallId} className="mt-4">
+                        <Weather {...result} />
+                      </div>
+                    );
+                  }
+                  if (toolName === "displayWeather" && state !== "result") {
+                    return (
+                      <div key={toolCallId} className="mt-4 text-gray-500">
+                        Loading weather...
+                      </div>
+                    );
+                  }
+                  if (state === "result" && toolName === "displayFlightDetails") {
+                    const { result } = toolInvocation;
+                    const { city, flights } = result;
+                    return (
+                      <div key={toolCallId} className="mt-4">
+                        <FlightDetails city={city} flights={flights} />
+                      </div>
+                    );
+                  }
+                  if (toolName === "displayFlightDetails" && state !== "result") {
+                    return (
+                      <div key={toolCallId} className="mt-4 text-gray-500">
+                        Loading flight details...
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
             </div>
           ))}
         </div>
       </div>
+
       <form
         onSubmit={handleSubmit}
         className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-1/2 flex items-center space-x-2"
