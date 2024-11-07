@@ -6,7 +6,6 @@ import { MemorySaver, Annotation, MessagesAnnotation } from "@langchain/langgrap
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { NextResponse } from "next/server";
-
 const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
@@ -15,7 +14,7 @@ const StateAnnotation = Annotation.Root({
 const weatherTool = tool(async ({ query }) => {
 
 
-    console.log("tool invoked");
+    // console.log("tool invoked");
     if (query.toLowerCase().includes("sf") || query.toLowerCase().includes("san francisco")) {
       return "It's 60 degrees and foggy.";
     }
@@ -36,45 +35,10 @@ const model = new ChatOpenAI({
   model: "gpt-3.5-turbo",
 }).bindTools(tools);
 
-// async function callModel(state: typeof StateAnnotation.State) {
-//   try {
-//     console.log("Model invoked");
-//     const messages = state.messages
-//       .map((message) => {
-//         if (message instanceof HumanMessage || message instanceof AIMessage) {
-//           const content = message.content;
-//           if (typeof content === 'string' && content.trim().length > 0) {
-//             return {
-//               role: message instanceof HumanMessage ? 'user' : 'assistant',
-//               content: content.trim(),
-//             };
-//           }
-//           return null; 
-//         }
-//         return null; 
-//       })
-//       .filter((message) => message !== null); 
-
-//     if (messages.length === 0) {
-//       throw new Error("No valid messages to process.");
-//     }
-//     const result = await model.invoke(messages);
-//     return { messages: [new AIMessage(result)] };
-
-//   } catch (err) {
-//     console.error("Error in callModel:", err);
-//     throw new Error("Failed to process the model request");
-//   }
-// }
 async function callModel(state: typeof MessagesAnnotation.State) {
   const response = await model.invoke(state.messages);
-
-  // We return a list, because this will get added to the existing list
   return { messages: [response] };
 }
-
-  
-  
 function shouldContinue(state: typeof StateAnnotation.State) {
   console.log("should conitnue invoked");
   const messages = state.messages;
@@ -101,7 +65,6 @@ const appWorkflow = workflow.compile({ checkpointer });
 export async function POST(req: Request) {
   try {
     const { query } = await req.json();
-console.log("text came ",query);
     if (!query || query.trim() === "") {
       return NextResponse.json({ error: "Query parameter is required." }, { status: 400 });
     }
@@ -115,7 +78,6 @@ console.log("text came ",query);
       { configurable: { thread_id: "42" } },
       
     );
-
     const responseMessage = finalState.messages[finalState.messages.length - 1].content;
     return NextResponse.json({ response: responseMessage });
   } catch (error) {
