@@ -22,7 +22,6 @@ export const apiRequest = async (endpoint: string, options: ApiRequestOptions) =
 
     return response.data;
   } catch (error: any) {
-    // Handle error gracefully
     throw new Error(error?.response?.data?.error || error.message || 'An error occurred');
   }
 };
@@ -30,9 +29,6 @@ export const apiRequest = async (endpoint: string, options: ApiRequestOptions) =
 export const signup = (data: any) =>
   apiRequest('signup', { method: 'POST', body: JSON.stringify(data) });
 
-// export const getAllProducts = async () => {
-//   return apiRequest('products', { method: 'GET' });
-// };
 
 interface Product {
   id:number;
@@ -43,4 +39,7 @@ interface Product {
 
 export const getAllProducts = async (): Promise<Product[]> => {
   return apiRequest('products', { method: 'GET' });
+};
+export const getProductById = async (id: number): Promise<Product> => {
+  return apiRequest(`products?id=${id}`, { method: 'GET' });
 };
