@@ -317,9 +317,13 @@ const appWorkflow = workflow.compile({
   checkpointer,
   interruptBefore: ["tools"],
 });
-async function processStream(reader: ReadableStreamDefaultReader<any>) {
+async function processStream(reader: ReadableStreamDefaultReader<any>, update:boolean) {
   let chunk;
   let responseContent = {};
+  const config = {
+    configurable: { thread_id: "42" },
+    streamMode: "values" as const,
+  };
 
   while (!(chunk = await reader.read()).done) {
     try {
@@ -328,6 +332,14 @@ async function processStream(reader: ReadableStreamDefaultReader<any>) {
 
       if (messagesArray && messagesArray.length > 0) {
         const lastMessage = messagesArray[messagesArray.length - 1];
+       console.log("args coming to me is this ");
+        console.log( lastMessage.tool_calls);
+if(update && lastMessage.tool_calls && lastMessage.tool_calls.length > 0){
+console.log("upadting the state now ....... ");
+  lastMessage.tool_calls[0].args = { query: "San Francisco" }
+  await appWorkflow.updateState(config, { messages: lastMessage });
+  return NextResponse.json({messages:"solved"});
+}
 
         if (lastMessage.content !== undefined) {
           responseContent = lastMessage.content.trim() === "" ? {} : { response: lastMessage.content };
@@ -369,10 +381,11 @@ export async function POST(req: Request) {
     const bool = pausedState?.next?.length > 0 ? 1 : 0;
     if (bool) {
       const events = await appWorkflow.stream(null, { ...config, streamMode: "values" });
+      // const events1 = await appWorkflow.updateState;
 
       if (events instanceof ReadableStream) {
         const reader = events.getReader();
-        const responseContent = await processStream(reader);
+        const responseContent = await processStream(reader,true);
         return NextResponse.json(responseContent);
       }
     }
@@ -384,7 +397,7 @@ export async function POST(req: Request) {
 
     if (finalState instanceof ReadableStream) {
       const reader = finalState.getReader();
-      const responseContent = await processStream(reader);
+      const responseContent = await processStream(reader,false);
       return NextResponse.json(responseContent);
     }
 
