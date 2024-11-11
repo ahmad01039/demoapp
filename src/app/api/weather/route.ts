@@ -240,7 +240,7 @@
 //   }
 // }
 
-//new code
+//new code for  human in the loop chunk 
 import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
@@ -269,7 +269,8 @@ const weatherTool = tool(
     ) {
       return "It's 60 degrees and foggy.";
     }
-    return "It's 90 degrees and sunny.";
+   
+     return "It's 90 degrees and sunny.";
   },
   {
     name: "weather",
@@ -280,17 +281,8 @@ const weatherTool = tool(
   }
 );
 
-const askHumanTool = tool(
-  (_) => {
-    return "The human said XYZ";
-  },
-  {
-    name: "askHuman",
-    description: "Ask the human for input.",
-    schema: z.string(),
-  }
-);
-const tools = [weatherTool, askHumanTool];
+
+const tools = [weatherTool];
 const toolNode = new ToolNode(tools);
 
 const model = new ChatOpenAI({
@@ -302,11 +294,6 @@ async function callModel(state: typeof MessagesAnnotation.State) {
   console.log("Model 1 response generated", response);
   return { messages: [response] };
 }
-
-// async function callModel(state: typeof MessagesAnnotation.State) {
-//   console.log("Model called ");
-//   return state;
-// }
 
 function shouldContinue(state: typeof StateAnnotation.State) {
   const messages = state.messages;
@@ -323,70 +310,42 @@ const workflow = new StateGraph(StateAnnotation)
   .addNode("tools", toolNode)
   .addEdge("__start__", "agent1")
   .addConditionalEdges("agent1", shouldContinue)
-  .addEdge("tools", "__end__");
-// .addEdge("tools", "agent1");
+.addEdge("tools", "agent1");
 
 const checkpointer = new MemorySaver();
 const appWorkflow = workflow.compile({
   checkpointer,
   interruptBefore: ["tools"],
 });
+async function processStream(reader: ReadableStreamDefaultReader<any>) {
+  let chunk;
+  let responseContent = {};
 
-// export async function POST(req: Request) {
-//   try {
-//     const { query, resume } = await req.json();
+  while (!(chunk = await reader.read()).done) {
+    try {
+      const chunkData = typeof chunk.value === 'string' ? JSON.parse(chunk.value) : chunk.value;
+      const messagesArray = chunkData.messages;
 
-//     const graphStateConfig = {
-//       messages: [new HumanMessage(query)],
-//       configurable: { thread_id: "42" },
-//       streamMode: "values" as const,
-//     };
-//     let events;
-//     if (resume) {
-//       console.log("Resuming workflow from last interruption...");
+      if (messagesArray && messagesArray.length > 0) {
+        const lastMessage = messagesArray[messagesArray.length - 1];
 
-//       events = await appWorkflow.stream(null, graphStateConfig);
-//     } else {
-//       if (!query || query.trim() === "") {
-//         return NextResponse.json(
-//           { error: "Query parameter is required." },
-//           { status: 400 }
-//         );
-//       }
-//       const initialInput = { messages: [new HumanMessage(query)] };
-//       events = await appWorkflow.stream(initialInput, graphStateConfig);
-//     }
+        if (lastMessage.content !== undefined) {
+          responseContent = lastMessage.content.trim() === "" ? {} : { response: lastMessage.content };
+        } else {
+          console.log("Last message is not an AIMessage or has no content.");
+        }
+      } else {
+        console.log("No messages array found in this chunk:", chunkData);
+      }
+    } catch (error) {
+      console.error("Error parsing chunk:", error);
+    }
+  }
 
-//     for await (const event of events) {
-//       console.log(`--- ${event.input} ---`);
-//       if (event.input === "interrupted") {
-//         console.log("--- GRAPH INTERRUPTED ---");
-//         return NextResponse.json({
-//           response: "Workflow interrupted, awaiting resume.",
-//         });
-//       }
-//     }
+  return responseContent;
+}
 
-//     const finalState = await appWorkflow.invoke(
-//       { messages: [new HumanMessage(query)] },
-//       { configurable: { thread_id: "42" }, streamMode: "values" as const }
-//     );
-//     //     const responseMessage =
-//     //       finalState.messages[finalState.messages.length - 1].content;
-//     //     return NextResponse.json({ response: responseMessage });
-//     // const finalState = await appWorkflow.invoke(graphStateConfig);
 
-//     // const responseMessage =
-//     //   finalState.messages[finalState.messages.length - 1].content;
-//     return NextResponse.json({ response: "hy there working on it" });
-//   } catch (error) {
-//     console.error("Error processing request:", error);
-//     return NextResponse.json(
-//       { error: "An error occurred while processing your request." },
-//       { status: 500 }
-//     );
-//   }
-// }
 export async function POST(req: Request) {
   try {
     const { query, resume } = await req.json();
@@ -403,51 +362,32 @@ export async function POST(req: Request) {
       streamMode: "values" as const,
     };
 
-    let events;
-
     const pausedState = await appWorkflow.getState(config);
     console.log("paused state coming to me is this ");
     console.log(pausedState);
-    const lastMessage = pausedState?.values?.messages?.[
-      pausedState.values.messages.length - 1
-    ] as AIMessage;
-    // Check if tool calls are present in the last AIMessage
-    const toolCalls = lastMessage?.tool_calls;
-    if (toolCalls && toolCalls.length > 0) {
-      // Mock tool response (example for weather tool)
-      const toolResponse = {
-        query: "San Francisco",
-        weather: "sunny",
-        temperature: "22°C",
-      };
 
-      // Assume we need to send the tool response to continue the workflow
-      const toolResponseMessage = new AIMessage({
-        content: JSON.stringify(toolResponse), // Assuming tool response needs to be a string
-        tool_calls: [],
-      });
+    const bool = pausedState?.next?.length > 0 ? 1 : 0;
+    if (bool) {
+      const events = await appWorkflow.stream(null, { ...config, streamMode: "values" });
 
-      // Add tool response message to the state
-      pausedState?.values?.messages?.push(toolResponseMessage);
-
-      // Continue the workflow with the tool response
-      events = await appWorkflow.stream(null, config);
+      if (events instanceof ReadableStream) {
+        const reader = events.getReader();
+        const responseContent = await processStream(reader);
+        return NextResponse.json(responseContent);
+      }
     }
-    // if (resume) {
-    //   console.log("Resuming workflow from last interruption...");
-    //   events = await appWorkflow.stream(null, config);
-    // } else {
-    //   const initialInput = { messages: [new HumanMessage(query)] };
-    //   events = await appWorkflow.stream(initialInput, config);
-    // }
 
     const finalState = await appWorkflow.stream(
       { messages: [new HumanMessage(query)] },
       config
     );
 
-    // const responseMessage =
-    //   finalState.messages[finalState.messages.length - 1].content;
+    if (finalState instanceof ReadableStream) {
+      const reader = finalState.getReader();
+      const responseContent = await processStream(reader);
+      return NextResponse.json(responseContent);
+    }
+
     return NextResponse.json({ response: "hey" });
   } catch (error) {
     console.error("Error processing request:", error);
@@ -457,3 +397,4 @@ export async function POST(req: Request) {
     );
   }
 }
+
