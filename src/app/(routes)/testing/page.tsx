@@ -15,7 +15,7 @@ export default function Home() {
         body: JSON.stringify({ query }),
       });
       const data = await res.json();
-      setResponse(data.response || "No response from API.");
+      setResponse(data.response || "Note: If you want to continue enter yes or no");
     } catch (err) {
       console.log(err);
     }

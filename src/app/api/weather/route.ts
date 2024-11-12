@@ -241,8 +241,9 @@
 // }
 
 //new code for  human in the loop chunk 
-import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { AIMessage, BaseMessage, HumanMessage,RemoveMessage } from "@langchain/core/messages";
 import { tool } from "@langchain/core/tools";
+
 import { z } from "zod";
 import { StateGraph } from "@langchain/langgraph";
 import {
@@ -334,12 +335,28 @@ async function processStream(reader: ReadableStreamDefaultReader<any>, update:bo
         const lastMessage = messagesArray[messagesArray.length - 1];
        console.log("args coming to me is this ");
         console.log( lastMessage.tool_calls);
-if(update && lastMessage.tool_calls && lastMessage.tool_calls.length > 0){
-console.log("upadting the state now ....... ");
-  lastMessage.tool_calls[0].args = { query: "San Francisco" }
-  await appWorkflow.updateState(config, { messages: lastMessage });
-  return NextResponse.json({messages:"solved"});
-}
+//  if(update && lastMessage.tool_calls && lastMessage.tool_calls.length > 0){
+ 
+
+// }
+
+// if(update && lastMessage.tool_calls && lastMessage.tool_calls.length > 0){
+// console.log("upadting the state now ....... ");
+//   lastMessage.tool_calls[0].args = { query: "San Francisco" }
+//   await appWorkflow.updateState(config, { messages: lastMessage });
+
+//   // const event=
+//   //  if (event instanceof ReadableStream) {
+// //  const reader = event.getReader();
+// // return await processStream(reader,false);
+
+
+// // }
+//  return NextResponse.json(responseContent);
+//   // return NextResponse.json({messages:"solved"});
+
+
+// }
 
         if (lastMessage.content !== undefined) {
           responseContent = lastMessage.content.trim() === "" ? {} : { response: lastMessage.content };
@@ -356,6 +373,7 @@ console.log("upadting the state now ....... ");
 
   return responseContent;
 }
+
 
 
 export async function POST(req: Request) {
@@ -379,16 +397,51 @@ export async function POST(req: Request) {
     console.log(pausedState);
 
     const bool = pausedState?.next?.length > 0 ? 1 : 0;
-    if (bool) {
+
+
+
+    if (bool && (query.includes("yes") || query.includes("true")) ) {
+      console.log("tool call found successufllfllfllflfl")
       const events = await appWorkflow.stream(null, { ...config, streamMode: "values" });
-      // const events1 = await appWorkflow.updateState;
+    
 
       if (events instanceof ReadableStream) {
         const reader = events.getReader();
         const responseContent = await processStream(reader,true);
+        
+        
+        
         return NextResponse.json(responseContent);
+        
       }
     }
+    else if(bool){
+      console.log("tool call found but lets remove it ")
+      const messages = pausedState?.values?.messages;
+      if (messages && messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        await appWorkflow.updateState(config, {
+          messages: new RemoveMessage({ id: lastMessage.id })
+        });
+        console.log("Last message removed successfully:", lastMessage.id);
+        const events = await appWorkflow.stream(null, { ...config, streamMode: "values" });
+ 
+        if (events instanceof ReadableStream) {
+          const reader = events.getReader();
+          const responseContent = await processStream(reader,true);
+          
+          
+          
+          return NextResponse.json(responseContent);
+          
+        }
+
+
+      }
+
+      // await appWorkflow.updateState(config, { messages: new RemoveMessage({ id: messages[0].id }) }) 
+    }
+    
 
     const finalState = await appWorkflow.stream(
       { messages: [new HumanMessage(query)] },
@@ -410,4 +463,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
