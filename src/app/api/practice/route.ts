@@ -63,14 +63,64 @@ const weatherTool = tool(
   },
   {
     name: "weather",
-    description: "Call to get the flight information.",
+    description: "Call to get the flight details from one location to another.",
     schema: z.object({
       query: z.string().describe("The query to use in your search."),
     }),
   }
 );
 
-const tools = [weatherTool];
+
+
+
+const seatAvailabilityTool = tool(
+  async ({ flightId }) => { 
+  const    seats= [
+        [
+          { seatNumber: "1A", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "1B", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "1C", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "1D", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "1E", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "1F", priceInUSD: 150, isAvailable: false },
+        ],
+        [
+          { seatNumber: "2A", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "2B", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "2C", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "2D", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "2E", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "2F", priceInUSD: 150, isAvailable: false },
+        ],
+        [
+          { seatNumber: "3A", priceInUSD: 150, isAvailable: true },
+          { seatNumber: "3B", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "3C", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "3D", priceInUSD: 150, isAvailable: false },
+          { seatNumber: "3E", priceInUSD: 150, isAvailable: true },
+          { seatNumber: "3F", priceInUSD: 150, isAvailable: true },
+        ],
+      ];
+    
+
+    return {
+      flightId: flightId,
+      seats: seats,
+    };
+  },
+  {
+    name: "seatAvailability",
+    description: "Call to get the seats information regarding any flight",
+    schema: z.object({
+      flightId: z.string().describe("The ID of the flight to retrieve seating information for."),
+    }),
+  }
+);
+
+
+
+
+const tools = [weatherTool,seatAvailabilityTool];
 const toolNode = new ToolNode(tools);
 
 const model = new ChatOpenAI({

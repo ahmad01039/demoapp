@@ -1,8 +1,7 @@
 "use client";
-
 import { useChat } from "ai/react";
 import cx from "classnames";
-
+import React from "react";
 interface Seat {
   seatNumber: string;
   priceInUSD: number;
@@ -83,48 +82,49 @@ export function SelectSeats({
           </div>
         </div>
 
-        {availability.seats.map((row, index) => (
-          <div key={`row-${index}`} className="flex flex-row gap-4">
-            {row.map((seat, seatIndex) => (
-              <>
-                {seatIndex === 3 ? (
-                  <div className="flex flex-row items-center justify-center w-full text-muted-foreground">
-                    {index + 1}
-                  </div>
-                ) : null}
-                <div
-                  key={seat.seatNumber}
-                  onClick={() => {
-                    append({
-                      role: "user",
-                      content: `I'd like to go with seat ${seat.seatNumber}`,
-                    });
-                  }}
-                  className={cx(
-                    "cursor-pointer group relative size-8 sm:size-10 flex-shrink-0 flex rounded-sm flex-row items-center justify-center",
-                    {
-                      "bg-blue-500 hover:bg-pink-500": seat.isAvailable,
-                      "bg-gray-500 cursor-not-allowed": !seat.isAvailable,
-                    },
-                  )}
-                >
-                  <div className="text-xs text-white">${seat.priceInUSD}</div>
-                  <div
-                    className={cx(
-                      "absolute -top-1 h-2 w-full scale-125 rounded-sm",
-                      {
-                        "bg-blue-600 group-hover:bg-pink-600": seat.isAvailable,
-                        "bg-zinc-600 cursor-not-allowed": !seat.isAvailable,
-                      },
-                    )}
-                  />
-                </div>
-              </>
-            ))}
+{availability.seats.map((row, index) => (
+  <div key={`row-${index}`} className="flex flex-row gap-4">
+    {row.map((seat, seatIndex) => (
+      <React.Fragment key={seat.seatNumber}>
+        {seatIndex === 3 ? (
+          <div
+            key={`row-number-${index}`}
+            className="flex flex-row items-center justify-center w-full text-muted-foreground"
+          >
+            {index + 1}
           </div>
-        ))}
-      </div>
-
+        ) : null}
+        <div
+          onClick={() => {
+            append({
+              role: "user",
+              content: `I'd like to go with seat ${seat.seatNumber}`,
+            });
+          }}
+          className={cx(
+            "cursor-pointer group relative size-8 sm:size-10 flex-shrink-0 flex rounded-sm flex-row items-center justify-center",
+            {
+              "bg-blue-500 hover:bg-pink-500": seat.isAvailable,
+              "bg-gray-500 cursor-not-allowed": !seat.isAvailable,
+            }
+          )}
+        >
+          <div className="text-xs text-white">${seat.priceInUSD}</div>
+          <div
+            className={cx(
+              "absolute -top-1 h-2 w-full scale-125 rounded-sm",
+              {
+                "bg-blue-600 group-hover:bg-pink-600": seat.isAvailable,
+                "bg-zinc-600 cursor-not-allowed": !seat.isAvailable,
+              }
+            )}
+          />
+        </div>
+      </React.Fragment>
+    ))}
+  </div>
+))}
+  </div>
       <div className="flex flex-row gap-4 justify-center pb-6">
         <div className="flex flex-row items-center gap-2">
           <div className="size-4 bg-blue-500 rounded-sm" />

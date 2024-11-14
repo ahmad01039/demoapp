@@ -11,6 +11,7 @@ interface ApiResponse {
       content: string;
       additional_kwargs?: any;
       response_metadata?: any;
+      name?:string;
     };
     response?: string | object;
   };
@@ -18,16 +19,14 @@ interface ApiResponse {
 
 interface MessageData {
   id: string;
-  // role: "user" | "assistant" | "ToolMessage";
   role: string;
   content: string;
+  
 }
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [response, setResponse] = useState<string>("");
   const [messages, setMessages] = useState<MessageData[]>([]);
-
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
     try {
@@ -39,32 +38,26 @@ export default function Home() {
         body: JSON.stringify({ query }),
       });
       const data: ApiResponse = await res.json();
-
-      // const mappedMessages: MessageData[] = Object.values(data).map(
-      //   (messageData) => {
-      //     const role = messageData.id.includes("HumanMessage")
-      //       ? "user"
-      //       : "assistant";
-
-      //     return {
-      //       id: messageData.id.join("."),
-      //       role: role,
-      //       content: messageData.kwargs.content,
-      //       toolInvocations: messageData.kwargs.additional_kwargs || [],
-      //     };
-      //   }
-      // );
       const mappedMessages: MessageData[] = Object.values(data).map(
         (messageData) => {
-          let role;
+          let role: string = "assistant";
+          let name;
+console.log("lets map the data ",messageData)
+
+
           if (messageData.id.includes("HumanMessage")) {
             role = "user";
           } else if (messageData.id.includes("ToolMessage")) {
-            role = "ToolMessage";
-          } else {
-            role = "assistant";
+            name = messageData?.kwargs?.name;
+          if(name==="weather"){
+            role="weather";
           }
 
+          else{
+            console.log("seats are available  ");
+            role="seatAvilability";
+          }
+          } 
           return {
             id: messageData.id.join("."),
             role: role,
