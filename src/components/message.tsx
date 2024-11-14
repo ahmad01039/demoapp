@@ -26,7 +26,7 @@
 //   role: string;
 //   content: string | ReactNode;
 //   toolInvocations: Array<ToolInvocation> | undefined;
- 
+
 // }) => {
 //   return (
 //     <motion.div
@@ -128,116 +128,106 @@ export const Message = ({
   chatId,
   role,
   content,
-  toolInvocations,
-  attachments,
 }: {
   chatId: string;
   role: string;
   content: string | ReactNode;
-  toolInvocations: Array<ToolInvocation> | undefined;
-  attachments?: Array<Attachment>;
 }) => {
+  let flightData;
+
+  console.log("role coming to me ");
+  console.log(role);
+  if (
+    role === "ToolMessage" &&
+    typeof content === "string" &&
+    content.trim().startsWith("{")
+  ) {
+    try {
+      flightData = JSON.parse(content);
+      console.log("converted successfullly ", flightData);
+    } catch (error) {
+      console.error("Failed to parse JSON content:", error);
+    }
+  }
+
   return (
-    <motion.div
-      className={`flex flex-row gap-4 px-4 w-full md:w-[500px] md:px-0 first-of-type:pt-20`}
-      initial={{ y: 5, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-    >
-      <div className="size-[24px] border rounded-sm p-1 flex flex-col justify-center items-center shrink-0 text-zinc-500">
-        {role === "assistant" ? <BotIcon /> : <UserIcon />}
-      </div>
-
-      <div className="flex flex-col gap-2 w-full">
-        {content && typeof content === "string" && (
-          <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-            <Markdown>{content}</Markdown>
+    <>
+      {content && typeof content === "string" && content.trim().length > 1 && (
+        <motion.div
+          className={`flex flex-row gap-4 px-4 w-full md:w-[500px] md:px-0 first-of-type:pt-20`}
+          initial={{ y: 5, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <div className="size-[24px] border rounded-sm p-1 flex flex-col justify-center items-center shrink-0 text-zinc-500">
+            {role === "assistant" ? <BotIcon /> : <UserIcon />}
           </div>
-        )}
 
-        {/* {toolInvocations && (
-          <div className="flex flex-col gap-4">
-            {toolInvocations.map((toolInvocation) => {
-              const { toolName, toolCallId, state } = toolInvocation;
+          <div className="flex flex-col gap-2 w-full">
+            <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
+              <Markdown>{content}</Markdown>
+            </div>
+            {flightData && <ListFlights chatId={chatId} results={flightData} />}
 
-              if (state === "result") {
-                const { result } = toolInvocation;
+            {/* {toolInvocations && (
+              <div className="flex flex-col gap-4">
+                {toolInvocations.map((toolInvocation) => {
+                  const { toolName, toolCallId, state } = toolInvocation;
 
-                return (
-                  <div key={toolCallId}>
-                    {toolName === "getWeather" ? (
-                      <Weather weatherAtLocation={result} />
-                    ) : toolName === "displayFlightStatus" ? (
-                      <FlightStatus flightStatus={result} />
-                    ) : toolName === "searchFlights" ? (
-                      <ListFlights chatId={chatId} results={result} />
-                    ) : toolName === "selectSeats" ? (
-                      <SelectSeats chatId={chatId} availability={result} />
-                    ) : toolName === "createReservation" ? (
-                      Object.keys(result).includes("error") ? null : (
-                        <CreateReservation reservation={result} />
-                      )
-                    // ) : toolName === "authorizePayment" ? (
-                    //   <AuthorizePayment intent={result} />
-                    ) : toolName === "displayBoardingPass" ? (
-                      <DisplayBoardingPass boardingPass={result} />
-                    ) : toolName === "verifyPayment" ? (
-                      <VerifyPayment result={result} />
-                    ) : (
-                      <div>{JSON.stringify(result, null, 2)}</div>
-                    )}
-                  </div>
-                );
-              } else {
-                return (
-                  <div key={toolCallId} className="skeleton">
-                    {toolName === "getWeather" ? (
-                      <Weather />
-                    ) : toolName === "displayFlightStatus" ? (
-                      <FlightStatus />
-                    ) : toolName === "searchFlights" ? (
-                      <ListFlights chatId={chatId} />
-                    ) : toolName === "selectSeats" ? (
-                      <SelectSeats chatId={chatId} />
-                    ) : toolName === "createReservation" ? (
-                      <CreateReservation />
-                    // ) : toolName === "authorizePayment" ? (
-                    //   <AuthorizePayment />
-                    ) : toolName === "displayBoardingPass" ? (
-                      <DisplayBoardingPass />
-                    ) : null}
-                  </div>
-                );
-              }
-            })}
+                  if (state === "result") {
+                    const { result } = toolInvocation;
+
+                    return (
+                      <div key={toolCallId}>
+                        {toolName === "getWeather" ? (
+                          <Weather weatherAtLocation={result} />
+                        ) : toolName === "displayFlightStatus" ? (
+                          <FlightStatus flightStatus={result} />
+                        ) : toolName === "searchFlights" ? (
+                          <ListFlights chatId={chatId} results={result} />
+                        ) : toolName === "selectSeats" ? (
+                          <SelectSeats chatId={chatId} availability={result} />
+                        ) : toolName === "createReservation" ? (
+                          Object.keys(result).includes("error") ? null : (
+                            <CreateReservation reservation={result} />
+                          )
+                        // ) : toolName === "authorizePayment" ? (
+                        //   <AuthorizePayment intent={result} />
+                        ) : toolName === "displayBoardingPass" ? (
+                          <DisplayBoardingPass boardingPass={result} />
+                        ) : toolName === "verifyPayment" ? (
+                          <VerifyPayment result={result} />
+                        ) : (
+                          <div>{JSON.stringify(result, null, 2)}</div>
+                        )}
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={toolCallId} className="skeleton">
+                        {toolName === "getWeather" ? (
+                          <Weather />
+                        ) : toolName === "displayFlightStatus" ? (
+                          <FlightStatus />
+                        ) : toolName === "searchFlights" ? (
+                          <ListFlights chatId={chatId} />
+                        ) : toolName === "selectSeats" ? (
+                          <SelectSeats chatId={chatId} />
+                        ) : toolName === "createReservation" ? (
+                          <CreateReservation />
+                        // ) : toolName === "authorizePayment" ? (
+                        //   <AuthorizePayment />
+                        ) : toolName === "displayBoardingPass" ? (
+                          <DisplayBoardingPass />
+                        ) : null}
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            )} */}
           </div>
-        )} */}
-
-       
-      </div>
-    </motion.div>
-  );
-};
-
-export const ChatMessages = ({ data }: { data: any }) => {
-  return (
-    <div className="flex min-h-screen w-full justify-center">
-      <div className="h-[85vh] w-[80vw] p-4 overflow-y-auto space-y-4">
-        {data.map((message: any, index: number) => {
-          const { id, kwargs } = message;
-          const content = kwargs.content;
-          const role = id[1] === "messages" ? "user" : "assistant"; 
-
-          return (
-            <Message
-              key={index}
-              chatId="chat-id"
-              role={role}
-              content={content}
-              toolInvocations={[]}
-            />
-          );
-        })}
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </>
   );
 };

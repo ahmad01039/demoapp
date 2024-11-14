@@ -1,33 +1,32 @@
-
 "use client";
 import { useState } from "react";
-import { Message } from "../../../components/message";  
+import { Message } from "../../../components/message";
 
 interface ApiResponse {
   [key: string]: {
     lc: number;
     type: string;
-    id: string[]; 
+    id: string[];
     kwargs: {
       content: string;
       additional_kwargs?: any;
       response_metadata?: any;
     };
-    response?: string | object; 
+    response?: string | object;
   };
 }
 
 interface MessageData {
   id: string;
-  role: "user" | "assistant"; 
+  // role: "user" | "assistant" | "ToolMessage";
+  role: string;
   content: string;
-  toolInvocations: any[];
 }
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [response, setResponse] = useState<string>(""); 
-  const [messages, setMessages] = useState<MessageData[]>([]); 
+  const [response, setResponse] = useState<string>("");
+  const [messages, setMessages] = useState<MessageData[]>([]);
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
@@ -39,21 +38,43 @@ export default function Home() {
         },
         body: JSON.stringify({ query }),
       });
-      const data: ApiResponse = await res.json(); 
+      const data: ApiResponse = await res.json();
 
-      const mappedMessages: MessageData[] = Object.values(data).map((messageData) => {
-        const role = messageData.id.includes("HumanMessage") ? "user" : "assistant";
+      // const mappedMessages: MessageData[] = Object.values(data).map(
+      //   (messageData) => {
+      //     const role = messageData.id.includes("HumanMessage")
+      //       ? "user"
+      //       : "assistant";
 
-        return {
-          id: messageData.id.join("."),
-          role: role, 
-          content: messageData.kwargs.content, 
-          toolInvocations: messageData.kwargs.additional_kwargs || [], 
-        };
-      });
+      //     return {
+      //       id: messageData.id.join("."),
+      //       role: role,
+      //       content: messageData.kwargs.content,
+      //       toolInvocations: messageData.kwargs.additional_kwargs || [],
+      //     };
+      //   }
+      // );
+      const mappedMessages: MessageData[] = Object.values(data).map(
+        (messageData) => {
+          let role;
+          if (messageData.id.includes("HumanMessage")) {
+            role = "user";
+          } else if (messageData.id.includes("ToolMessage")) {
+            role = "ToolMessage";
+          } else {
+            role = "assistant";
+          }
 
-      setMessages(mappedMessages); 
+          return {
+            id: messageData.id.join("."),
+            role: role,
+            content: messageData.kwargs.content,
+            toolInvocations: messageData.kwargs.additional_kwargs || [],
+          };
+        }
+      );
 
+      setMessages(mappedMessages);
     } catch (err) {
       console.log(err);
     }
@@ -61,16 +82,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 py-8">
-      <h1 className="text-3xl font-semibold text-center mb-6 text-pink-800">Datics Bot</h1>
+      <h1 className="text-3xl font-semibold text-center mb-6 text-pink-800">
+        Datics Bot
+      </h1>
       <div className="flex min-h-screen w-full justify-center">
         <div className="h-[85vh] w-[80vw] p-4 overflow-y-auto space-y-4">
-          {messages.map((message,index) => (
+          {messages.map((message, index) => (
             <div key={index}>
               <Message
                 chatId={index.toString()}
                 role={message.role}
                 content={message.content}
-                toolInvocations={message.toolInvocations || []}  
               />
             </div>
           ))}
@@ -96,6 +118,5 @@ export default function Home() {
         </button>
       </form>
     </div>
-    
   );
 }
